@@ -2,3 +2,4 @@ selenium
 jupyter
 pyautogui
 keyboard
+python-dotenv
