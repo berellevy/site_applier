@@ -302,3 +302,6 @@ def simple_dropdown(browser, button_data_id, value):
         popup.find_element(XP, el_text_content("div", value)).click()
     except Exception as e:
         print("simple_dropdown", button_data_id, e, e.args)
+
+
+

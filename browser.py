@@ -29,4 +29,31 @@ def get_browser() -> webdriver.Chrome:
 
 
 
+def find_element( 
+        browser: D,
+        by: str, 
+        selector: str, 
+        raise_error: bool = False
+    ) -> WebElement | bool:
+    """
+    return the webelement or False if not found. option to raise error
+    """
+    try:
+        return browser.find_element(by, selector)
+    except Exception as e:
+        if raise_error:
+            raise e
+        else:
+            return False
+        
 
+def data_id_find(el, data_id, starts_with=False):
+    if starts_with:
+        modifier = "^"
+    else:
+        modifier = ""
+    return (CSS, f"{el}[data-automation-id{modifier}='{data_id}']")
+
+
+def el_text_content(element, text) -> tuple[str, str]:
+    return (XP, f"//{element}[contains( text( ), '{text}')]")
