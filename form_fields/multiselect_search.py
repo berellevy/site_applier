@@ -7,8 +7,8 @@ from browser import CSS, D, data_id_find, WebElement, find_element, Keys
 from .base_form_field import BaseFormField
 
 CORRECT_ANSWERS: dict[str, list[str]] = {
-  "How Did You Hear About Us?*": ["Linkedin"],
-  "Country Phone Code*": ["United States of America (+1)"]
+  "My Information.How Did You Hear About Us?*": ["Linkedin"],
+  "My Information.Country Phone Code*": ["United States of America (+1)"]
 
 }
 
@@ -16,21 +16,16 @@ class MultiselectSearchField(BaseFormField):
   @cached_property
   def name(self):
     label = find_element(self.element, CSS, "label")
-    return label.text
+    return f"{self.parent_name}{label.text}"
   
   @property
   def is_required(self):
-    return "*" in self.name
+    return self.name.endswith("*")
   
 
   @property
   def correct_answer(self) -> str:
-    if a:=CORRECT_ANSWERS.get(self.name):
-      return a
-    elif not self.is_required:
-      return ""
-    else:
-      raise KeyError(f"Input Field '{self.name}' has no correct answer.")
+    return CORRECT_ANSWERS.get(self.name)
 
   @property
   def answers(self):
@@ -56,7 +51,9 @@ class MultiselectSearchField(BaseFormField):
   
   
   def fill(self):
-    if not self.is_filled:
+    if self.is_filled:
+      return
+    if self.correct_answer:
       self.empty_answers()
       self.open_dropdown()
       search_element = find_element(self.element, *data_id_find("input", "searchBox"))
@@ -64,7 +61,9 @@ class MultiselectSearchField(BaseFormField):
       for answer in self.correct_answer:
         search_element.send_keys(answer)
         search_element.send_keys(Keys.ENTER)
-    
+    elif (not self.correct_answer) and self.is_required:
+      raise KeyError(f"Input Field '{self.name}' has no correct answer.")
+      
 
 
 
@@ -73,6 +72,6 @@ def qualify_multiselect_search_field(field: WebElement) -> bool:
     find_element(field, *data_id_find("div", "multiselectInputContainer"))
   )
 
-def find_multiselect_search_fields(browser: D) -> list[MultiselectSearchField]:
+def find_multiselect_search_fields(browser: D, parent_section=None) -> list[MultiselectSearchField]:
   inputs = browser.find_elements(*data_id_find("div", "formField", starts_with=True))
-  return [MultiselectSearchField(input) for input in inputs if qualify_multiselect_search_field(input)]
+  return [MultiselectSearchField(input, parent_section) for input in inputs if qualify_multiselect_search_field(input)]

@@ -19,7 +19,7 @@ class BasePage:
   
   @property
   def fields(self) -> BaseFormField:
-    return find_form_fields(self.browser)
+    return find_form_fields(self.browser, self)
   
   def fill(self):
     pass
@@ -43,6 +43,7 @@ class JobDescription(BasePage):
   """
   just needs a next_page method since there is no filling to do.
   """
+  name = "Job Description"
   @classmethod
   def is_current(cls, browser: D) -> bool:
     if (
@@ -61,6 +62,7 @@ class JobDescription(BasePage):
 @register
 class StartApplication(BasePage):
   """this is a little popup with a choice of how to fill out the app."""
+  name = "Start Your Application"
 
   @classmethod
   def is_current(cls, browser: D):
@@ -82,6 +84,7 @@ class StartApplication(BasePage):
 
 @register
 class SignIn(BasePage):
+  name = "Sign In"
   @classmethod
   def is_current(cls, browser: D) -> bool:
     if (
@@ -112,6 +115,7 @@ class SignIn(BasePage):
   
 @register
 class MyInformation(BasePage):
+  name = "My Information"
   @classmethod
   def is_current(cls, browser: D):
     if find_element(browser, *el_text_content("h2", "My Information")):
@@ -121,6 +125,22 @@ class MyInformation(BasePage):
     for field in self.fields:
       if field.is_required:
         field.fill()
+
+
+  def next_page(self):
+    find_element(self.browser, *data_id_find("button", "bottom-navigation-next-button")).click()
+
+
+
+@register
+class MyExperience(BasePage):
+  name = "My Experience"
+  @classmethod
+  def is_current(cls, browser: D):
+    if find_element(browser, *el_text_content("h2", "My Experience")):
+      return cls(browser)
+
+    
 
 
 

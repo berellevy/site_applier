@@ -47,13 +47,36 @@ def find_element(
             return False
         
 
-def data_id_find(el, data_id, starts_with=False):
+def data_id_find(el, data_id, starts_with=False, ends_with=False) -> tuple[str, str]:
     if starts_with:
         modifier = "^"
+    elif ends_with:
+        modifier = "$"
     else:
         modifier = ""
     return (CSS, f"{el}[data-automation-id{modifier}='{data_id}']")
 
 
-def el_text_content(element, text) -> tuple[str, str]:
-    return (XP, f"//{element}[contains( text( ), '{text}')]")
+def el_text_content(
+    element: str, 
+    text: str, 
+    parent: str = None
+) -> tuple[str, str]:
+    """
+    params:
+     - element: Valid html element or '*'
+     - text: 
+     - parent: If you want to select the parent element of the element containing the text, specify the parent element's correct tag name / identifier.
+        
+    """
+    suffix = f"/parent::{parent}" if parent else ""
+    return (XP, f"//{element}[contains( text( ), '{text}')]{suffix}")
+
+
+# def get_parent(element: WebElement) -> D:
+#     """
+#     Returns an elements immediate parent in the dom.
+#     Unlike `element.parent`. which is, per the selenium intellisense:
+#     The 'Internal reference to the WebDriver instance this element was found from.
+#     """
+#     return element.find_element(XP, "..")
