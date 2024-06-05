@@ -1,4 +1,4 @@
-from browser import CSS, D, XP, data_id_find, el_text_content, find_element, WebElement
+from browser import CSS, D, XP, data_id_find, el_text_content, find_element, WebElement, xp_attr_starts_with
 from form_fields.base_form_field import BaseFormField
 
 CORRECT_ANSWERS: dict[str, str] = {
@@ -8,14 +8,12 @@ CORRECT_ANSWERS: dict[str, str] = {
 }
 
 class Dropdown(BaseFormField):
-  @property
-  def name(self):
-    label = find_element(self.element, CSS, "label")
-    return f"{self.parent_name}{label.text}"
-  
-  @property
-  def is_required(self):
-    return "*" in self.name
+  XPATH = f"""
+    .//div
+    [{xp_attr_starts_with("data-automation-id", "formField-")}]
+    [.//button[@aria-haspopup="listbox"]]
+  """
+  NAME_XPATH = ".//label"
   
   @property
   def button_element(self) -> WebElement:
@@ -58,15 +56,3 @@ class Dropdown(BaseFormField):
     elif (not self.correct_answer) and self.is_required:
       raise KeyError(f"Input Field '{self.name}' has no correct answer.")
 
-
-
-def qualify_dropdown(element: WebElement):
-  return bool(
-    find_element(element, CSS, "button[aria-haspopup='listbox']")
-  )
-
-
-
-def find_dropdowns(browser: D, parent_section=None):
-  inputs = browser.find_elements(*data_id_find("div", "formField", starts_with=True))
-  return [Dropdown(input, parent_section) for input in inputs if qualify_dropdown(input)]

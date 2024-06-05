@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import TypeVar, Union
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -27,7 +28,14 @@ XP = By.XPATH
 def get_browser() -> webdriver.Chrome:
     return webdriver.Chrome()
 
+@lru_cache(maxsize=4)
+def get_action_chain(browser: WebDriver):
+    """same browser doesn't need new action chains each time"""
+    return ActionChains(browser)
 
+def move_to_element(element: WebElement):
+  a = get_action_chain(element.parent)
+  a.move_to_element(element).perform()
 
 def find_element( 
         browser: D,
@@ -72,6 +80,16 @@ def el_text_content(
     suffix = f"/parent::{parent}" if parent else ""
     return (XP, f"//{element}[contains( text( ), '{text}')]{suffix}")
 
+def xp_attr_ends_with(attr: str, value: str) -> str:
+  """because xpath 1. attr can also be `'text()'`"""
+  if not attr == "text()":
+      attr = f"@{attr}"
+  return f"substring({attr}, string-length({attr}) - string-length('{value}') + 1) = '{value}'"
+
+
+def xp_attr_starts_with(attr: str, value: str) -> str:
+    attr = f"@{attr}" if attr != "text()" else attr
+    return f"starts-with({attr}, '{value}')"
 
 # def get_parent(element: WebElement) -> D:
 #     """
@@ -80,3 +98,7 @@ def el_text_content(
 #     The 'Internal reference to the WebDriver instance this element was found from.
 #     """
 #     return element.find_element(XP, "..")
+
+
+def remove_element(element: WebElement):
+  element.parent.execute_script("arguments[0].remove()", element)

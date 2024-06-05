@@ -1,19 +1,19 @@
 from functools import cached_property
 import os
-from browser import CSS, D, data_id_find, find_element, el_text_content, WebElement, Keys
+from browser import CSS, D, data_id_find, find_element, el_text_content, WebElement, Keys, xp_attr_starts_with
 from workday import is_required
 from .base_form_field import BaseFormField
 
 
 REQUIRED_FIELDS = {
-  "Email Address",
-  "Password",
+  "Sign In.Email Address",
+  "Sign In.Password",
 }
 
 
 CORRECT_ANSWERS = {
-  "Email Address": os.getenv("WORKDAY_USERNAME"),
-  "Password": os.getenv("WORKDAY_PASSWORD"),
+  "Sign In.Email Address": os.getenv("WORKDAY_USERNAME"),
+  "Sign In.Password": os.getenv("WORKDAY_PASSWORD"),
   "My Information.First Name*": "Dovber",
   "My Information.Last Name*": "Levy",
   "My Information.Address Line 1*": "575 East New York Ave",
@@ -23,16 +23,13 @@ CORRECT_ANSWERS = {
 }
 
 class TextInput(BaseFormField):
-
-  @cached_property
-  def _label(self) -> WebElement:
-    return find_element(self.element, CSS, "label")
-  
-  @property
-  def name(self) -> str:
-    """Used to identify the correct answer."""
-    parent_name = f"{self.parent_section.name}." if self.parent_section else ""
-    return f"{parent_name}{self._label.text}"
+  XPATH = f"""
+    //div
+    [{xp_attr_starts_with("data-automation-id", "formField-")}]
+    [.//input[@type="text"] or .//input[@type="password"]]
+    [not(.//*[@aria-haspopup])]
+  """
+  NAME_XPATH = ".//label"
   
   @cached_property
   def input_element(self) -> WebElement:
@@ -41,8 +38,7 @@ class TextInput(BaseFormField):
   @property
   def is_required(self):
     return (
-      self.name in REQUIRED_FIELDS or
-      self.name.endswith("*")
+      self.name in REQUIRED_FIELDS or super().is_required
     )
 
   @cached_property
@@ -67,18 +63,3 @@ class TextInput(BaseFormField):
     elif (not self.correct_answer) and self.is_required:
       raise KeyError(f"Input Field '{self.name}' has no correct answer.")
     
-    
-
-
-def qualify_text_input(field: WebElement) -> bool:
-  is_text_or_password = (
-    find_element(field, CSS, "[type='text']") or find_element(field, CSS, "[type='password']")
-  )
-  return bool(
-    is_text_or_password and 
-    (not find_element(field, CSS, "[aria-haspopup]"))
-  )
-
-def find_text_inputs(browser: D, parent_section = None) -> list[TextInput]:
-  inputs = browser.find_elements(*data_id_find("div", "formField", starts_with=True))
-  return [TextInput(element, parent_section) for element in inputs if qualify_text_input(element)]

@@ -1,13 +1,18 @@
-from browser import CSS, D, data_id_find, find_element, WebElement
+from browser import CSS, D, XP, data_id_find, find_element, WebElement, xp_attr_ends_with, xp_attr_starts_with
 from form_fields.base_form_field import BaseFormField
-from form_fields.text_input import find_text_inputs
+from form_fields.text_input import TextInput
 
 
 class SubSection(BaseFormField):
-  @property
-  def name(self):
-    h4_text = find_element(self.element, CSS, "h4").text
-    return f"{self.parent_name}{h4_text}"
+  NAME_XPATH = ".//h4"
+
+  @classmethod
+  def find_all(cls, browser: D, parent_section):
+    xpath = f"""
+      .//div
+      [{xp_attr_starts_with("data-automation-id", parent_section.section_data_id + "-")}]
+    """
+    return [cls(f, parent_section) for f in browser.find_elements(XP, xpath)]
   
   @property
   def delete_button_element(self) -> WebElement:
@@ -19,9 +24,9 @@ class SubSection(BaseFormField):
 
   @property
   def form_fields(self) ->list[BaseFormField]:
-    fields = []
-    fields += find_text_inputs(self.element, self)
-    return fields
+    return [
+      *TextInput.find_all(self.element, self),
+    ]
       
   
   @property
@@ -29,13 +34,15 @@ class SubSection(BaseFormField):
     return not bool(self.delete_button_element)
   
 
-
+ 
 
 class MultiSection(BaseFormField):
-  @property
-  def name(self) -> str:
-    h3_text = find_element(self.element, CSS, "h3").text
-    return f"{self.parent_name}{h3_text}"
+  XPATH = f"""
+    //div
+    [{xp_attr_ends_with('data-automation-id', 'Section')}]
+    [.//button[{xp_attr_starts_with('text()', 'Add')}]]
+  """
+  NAME_XPATH = ".//h3"
   
   @property
   def add_button_element(self) -> WebElement:
@@ -47,17 +54,4 @@ class MultiSection(BaseFormField):
 
   @property
   def sub_sections(self) -> list[SubSection]:
-    data_id = data_id_find("div", f"{self.section_data_id}-", starts_with=True)
-    elements = self.element.find_elements(*data_id)
-    return [SubSection(e, self) for e in elements]
-
-
-
-
-
-def qualify_multi_section(element: D) -> D:
-  return bool(find_element(element, *data_id_find("button", "Add", starts_with=True)))
-
-def find_multi_sections(browser: D, parent_section = None) -> list[MultiSection]:
-  sections = browser.find_elements(*data_id_find("div", "Section", ends_with=True))
-  return [MultiSection(section, parent_section) for section in sections if qualify_multi_section(section)]
+    return SubSection.find_all(self.element, self)

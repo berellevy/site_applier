@@ -1,10 +1,26 @@
-from browser import D
+from browser import D, XP, find_element
 
 
 class BaseFormField:
-  def __init__(self, element: D, parent_section = None) -> None:
+  XPATH: str
+  NAME_XPATH: str
+
+  @classmethod
+  def find_all(cls, browser: D, parent_section):
+    return [cls(f, parent_section) for f in browser.find_elements(XP, cls.XPATH)]
+
+  def __init__(self, element: D, parent_section) -> None:
     self.element = element
     self.parent_section = parent_section
+
+  @property
+  def name(self) -> str:
+    return find_element(self.element, XP, self.NAME_XPATH).text  
+
+  @property
+  def is_required(self) -> bool:
+    return "*" in self.name
+
 
   @property
   def parent_name(self) -> str:

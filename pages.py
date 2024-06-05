@@ -2,30 +2,46 @@
 A class for each page.
 """
 
-from browser import D, XP, el_text_content, find_element, data_id_find
-from form_fields import BaseFormField, find_form_fields
+from browser import D, XP, el_text_content, find_element, data_id_find, remove_element, xp_attr_starts_with
+from form_fields import BaseFormField, TextInput, MultiselectSearchField, Dropdown, Radio
 
 
 
 
 
 class BasePage:
+  XPATH: str = ""
+  NEXT_PAGE_BUTTON_XPATH: str = ""
   def __init__(self, browser: D) -> None:
     self.browser = browser
   
   @classmethod
-  def is_current(cls, browser: D):
-    raise NotImplemented()
-  
+  def is_current(cls, browser: D) -> bool:
+    if find_element(browser, XP, cls.XPATH):
+      return cls(browser)
+
   @property
   def fields(self) -> BaseFormField:
-    return find_form_fields(self.browser, self)
+    return [
+      *TextInput.find_all(self.browser, self),
+      *MultiselectSearchField.find_all(self.browser, self),
+      *Dropdown.find_all(self.browser, self),
+      *Radio.find_all(self.browser, self),
+    ]
   
+  def delete_header(self):
+    """The header element sometimes blocks clicks to form fields."""
+    if header:=find_element(self.browser, *data_id_find("div", "header")):
+      remove_element(header)
+
   def fill(self):
-    pass
+    for field in self.fields:
+      field.fill()
 
   def next_page(self):
-    pass
+    self.fill()
+    find_element(self.browser, XP, self.NEXT_PAGE_BUTTON_XPATH).click()
+
 
 PAGES: list[BasePage] = []
 
@@ -44,17 +60,15 @@ class JobDescription(BasePage):
   just needs a next_page method since there is no filling to do.
   """
   name = "Job Description"
-  @classmethod
-  def is_current(cls, browser: D) -> bool:
-    if (
-      find_element(browser, *data_id_find("div", "jobPostingPage")) and 
-      (not find_element(browser, *el_text_content("h2", "Start Your Application")))
-    ):
-      return cls(browser)
-
-  def next_page(self):
-    button = find_element(self.browser, *el_text_content("a", "Apply"))
-    button.click()
+  XPATH = """
+  //body[
+    .//div[@data-automation-id="jobPostingPage"] 
+    and not(.//h2[contains(text(),"Start Your Application")])
+  ]
+  """
+  NEXT_PAGE_BUTTON_XPATH = """
+  //a[text()="Apply"]
+  """
 
 
 
@@ -63,21 +77,13 @@ class JobDescription(BasePage):
 class StartApplication(BasePage):
   """this is a little popup with a choice of how to fill out the app."""
   name = "Start Your Application"
-
-  @classmethod
-  def is_current(cls, browser: D):
-    if find_element(browser, *el_text_content("h2", "Start Your Application")):
-      return cls(browser)
-    
-
-  def next_page(self):
-    button = find_element(self.browser, *data_id_find("a", "useMyLastApplication"))
-    button.click()
-
-  
-  @property
-  def fields(self) -> list[BaseFormField]:
-    return find_form_fields(self.browser)
+  XPATH = """
+  //body[
+    .//div[@data-automation-id="jobPostingPage"] 
+    and .//h2[contains(text(),"Start Your Application")]
+  ]
+  """
+  NEXT_PAGE_BUTTON_XPATH = "//a[@data-automation-id='useMyLastApplication']"
   
 
 
@@ -85,61 +91,33 @@ class StartApplication(BasePage):
 @register
 class SignIn(BasePage):
   name = "Sign In"
-  @classmethod
-  def is_current(cls, browser: D) -> bool:
-    if (
-      find_element(browser, *el_text_content("h2", "Sign In")) and
-      (not find_element(browser, *data_id_find("div", "errorMessage")))
-    ):
-      return cls(browser)
+  XPATH = """
+  //div[
+    @id='mainContent' and 
+    .//h2[text()='Sign In'] 
+    and not(.//div[@data-automation-id='errorMessage'])]
+  """
+  NEXT_PAGE_BUTTON_XPATH = """
+  //button[@data-automation-id="signInSubmitButton"]/parent::div
+  """
   
-  
-  def fill(self):
-    for field in self.fields:
-      if field.is_required:
-        field.fill()
-
-  def next_page(self):
-    button = find_element(self.browser, *data_id_find("button", "signInSubmitButton"))
-    button.find_element(XP, "..").click()
-  
-
-
-# @register
-# class SignInWrongPassword(BasePage):
-#   def is_current(self, browser: D) -> bool:
-#     return bool(
-#       find_element(browser, *el_text_content("h2", "Sign In")) and
-#       find_element(browser, *data_id_find("div", "errorMessage"))
-#     )
   
 @register
 class MyInformation(BasePage):
   name = "My Information"
-  @classmethod
-  def is_current(cls, browser: D):
-    if find_element(browser, *el_text_content("h2", "My Information")):
-      return cls(browser)
+  XPATH = f"//h2[{xp_attr_starts_with('text()', 'My Information')}]"
+  NEXT_PAGE_BUTTON_XPATH = "//button[@data-automation-id='bottom-navigation-next-button']"
   
   def fill(self):
-    for field in self.fields:
-      if field.is_required:
-        field.fill()
-
-
-  def next_page(self):
-    find_element(self.browser, *data_id_find("button", "bottom-navigation-next-button")).click()
+    self.delete_header()
+    super().fill()
 
 
 
 @register
 class MyExperience(BasePage):
   name = "My Experience"
-  @classmethod
-  def is_current(cls, browser: D):
-    if find_element(browser, *el_text_content("h2", "My Experience")):
-      return cls(browser)
-
+  XPATH = f"//h2[{xp_attr_starts_with('text()', 'My Experience')}]"
     
 
 
@@ -148,4 +126,5 @@ class MyExperience(BasePage):
 class Unknown(BasePage):
   @classmethod
   def is_current(cls, browser: D) -> bool:
+    """will always return the browser"""
     return cls(browser)
