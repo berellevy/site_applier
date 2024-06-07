@@ -2,14 +2,17 @@
 A class for each page.
 """
 
-from browser import D, XP, el_text_content, find_element, data_id_find, remove_element, xp_attr_starts_with
+import os
+from browser import D, XP, find_element, data_id_find, remove_element
 from form_fields import BaseFormField, TextInput, MultiselectSearchField, Dropdown, Radio
-
+from form_fields.multi_section import MultiSection
+import xpaths
 
 
 
 
 class BasePage:
+  name: str
   XPATH: str = ""
   NEXT_PAGE_BUTTON_XPATH: str = ""
   def __init__(self, browser: D) -> None:
@@ -27,7 +30,13 @@ class BasePage:
       *MultiselectSearchField.find_all(self.browser, self),
       *Dropdown.find_all(self.browser, self),
       *Radio.find_all(self.browser, self),
+      *MultiSection.find_all(self.browser, self)
     ]
+  
+  @property
+  def path(self) -> list[str]:
+    """Needed by form field path methods."""
+    return [self.name]
   
   def delete_header(self):
     """The header element sometimes blocks clicks to form fields."""
@@ -60,15 +69,8 @@ class JobDescription(BasePage):
   just needs a next_page method since there is no filling to do.
   """
   name = "Job Description"
-  XPATH = """
-  //body[
-    .//div[@data-automation-id="jobPostingPage"] 
-    and not(.//h2[contains(text(),"Start Your Application")])
-  ]
-  """
-  NEXT_PAGE_BUTTON_XPATH = """
-  //a[text()="Apply"]
-  """
+  XPATH = xpaths.JOB_DESCRIPTION_PAGE
+  NEXT_PAGE_BUTTON_XPATH = "//a[text()='Apply']"
 
 
 
@@ -77,12 +79,7 @@ class JobDescription(BasePage):
 class StartApplication(BasePage):
   """this is a little popup with a choice of how to fill out the app."""
   name = "Start Your Application"
-  XPATH = """
-  //body[
-    .//div[@data-automation-id="jobPostingPage"] 
-    and .//h2[contains(text(),"Start Your Application")]
-  ]
-  """
+  XPATH = xpaths.START_APPLICATION_PAGE
   NEXT_PAGE_BUTTON_XPATH = "//a[@data-automation-id='useMyLastApplication']"
   
 
@@ -91,23 +88,46 @@ class StartApplication(BasePage):
 @register
 class SignIn(BasePage):
   name = "Sign In"
-  XPATH = """
-  //div[
-    @id='mainContent' and 
-    .//h2[text()='Sign In'] 
-    and not(.//div[@data-automation-id='errorMessage'])]
-  """
+  XPATH = xpaths.SIGN_IN_PAGE
   NEXT_PAGE_BUTTON_XPATH = """
-  //button[@data-automation-id="signInSubmitButton"]/parent::div
+  //button[@data-automation-id='signInSubmitButton']/parent::div
   """
+  ANSWERS = {
+    TextInput: {
+      "Email Address": os.getenv("WORKDAY_USERNAME"),
+      "Password": os.getenv("WORKDAY_PASSWORD"),
+    },
+  }
   
   
 @register
 class MyInformation(BasePage):
   name = "My Information"
-  XPATH = f"//h2[{xp_attr_starts_with('text()', 'My Information')}]"
+  XPATH = xpaths.MY_INFORMATION_PAGE
   NEXT_PAGE_BUTTON_XPATH = "//button[@data-automation-id='bottom-navigation-next-button']"
-  
+  ANSWERS = {
+    TextInput: {
+      "First Name*": "Dovber",
+      "Last Name*": "Levy",
+      "Address Line 1*": "575 East New York Ave",
+      "City*": "Brooklyn",
+      "Postal Code*": "11225",
+      "Phone Number*": os.getenv("PHONE_NUMBER"),
+    },
+    MultiselectSearchField: {
+        "How Did You Hear About Us?*": ["Linkedin"],
+        "Country Phone Code*": ["United States of America (+1)"],
+    },
+    Dropdown: {
+      "Country*": "United States of America",
+      "State*": "New York",
+      "Phone Device Type*": "Mobile",
+    },
+    Radio: {
+      "Have you worked at": "No",
+    },
+  }
+
   def fill(self):
     self.delete_header()
     super().fill()
@@ -117,13 +137,15 @@ class MyInformation(BasePage):
 @register
 class MyExperience(BasePage):
   name = "My Experience"
-  XPATH = f"//h2[{xp_attr_starts_with('text()', 'My Experience')}]"
+  XPATH = xpaths.MY_EXPERIENCE_PAGE
+  
     
 
 
 
 @register
 class Unknown(BasePage):
+  name = "Unknown"
   @classmethod
   def is_current(cls, browser: D) -> bool:
     """will always return the browser"""
