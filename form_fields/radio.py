@@ -1,24 +1,13 @@
 from functools import lru_cache
 from browser import CSS, D, XP, data_id_find, el_text_content, find_element, WebElement, ActionChains, get_action_chain, move_to_element, xp_attr_starts_with
 from form_fields.base_form_field import BaseFormField
+import xpaths
 
-CORRECT_ANSWERS = {
-  "My Information.Have you worked at Etsy, Reverb, or Depop before?*": "No",
-}
 
 
 class Radio(BaseFormField):
-  XPATH = f"""
-    //div[
-      {xp_attr_starts_with("data-automation-id", "formField-")}
-      and .//input[@type="radio"]
-    ]
-  """
+  XPATH = xpaths.FORM_RADIO
   NAME_XPATH = ".//legend"
-  
-  @property
-  def correct_answer(self) -> str:
-    return CORRECT_ANSWERS.get(self.name)
     
 
   def fill(self):

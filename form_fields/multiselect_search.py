@@ -5,29 +5,16 @@ from functools import cached_property
 from time import sleep
 from browser import CSS, D, data_id_find, WebElement, find_element, Keys, xp_attr_starts_with
 from .base_form_field import BaseFormField
+import xpaths
 
 CORRECT_ANSWERS: dict[str, list[str]] = {
-  "My Information.How Did You Hear About Us?*": ["Linkedin"],
-  "My Information.Country Phone Code*": ["United States of America (+1)"]
+  "How Did You Hear About Us?*": ["Linkedin"],
+  "Country Phone Code*": ["United States of America (+1)"]
 }
 
-
-data_id_find("div", "formField", starts_with=True)
-data_id_find("div", "multiselectInputContainer")
-
 class MultiselectSearchField(BaseFormField):
-  XPATH = f"""
-    //div
-    [{xp_attr_starts_with("data-automation-id", "formField-")}]
-    [.//div[@data-automation-id="multiselectInputContainer"]]
-
-
-  """
+  XPATH = xpaths.FORM_MULTISELECT_SEARCH
   NAME_XPATH = ".//label"
-  
-  @property
-  def correct_answer(self) -> str:
-    return CORRECT_ANSWERS.get(self.name)
 
   @property
   def answers(self):
@@ -45,8 +32,7 @@ class MultiselectSearchField(BaseFormField):
   def open_dropdown(self):
     if not self.dropdown_open:
       find_element(self.element, *data_id_find("div", "multiselectInputContainer")).click()
-
-
+  
   def empty_answers(self):
     for answer in self.answers:
       find_element(answer, *data_id_find("div", "DELETE_charm")).click()

@@ -1,6 +1,8 @@
 from browser import CSS, D, XP, data_id_find, find_element, WebElement, xp_attr_ends_with, xp_attr_starts_with
 from form_fields.base_form_field import BaseFormField
+from form_fields.dropdown import Dropdown
 from form_fields.text_input import TextInput
+import xpaths
 
 
 class SubSection(BaseFormField):
@@ -10,7 +12,7 @@ class SubSection(BaseFormField):
   def find_all(cls, browser: D, parent_section):
     xpath = f"""
       .//div
-      [{xp_attr_starts_with("data-automation-id", parent_section.section_data_id + "-")}]
+      [{xp_attr_starts_with("data-automation-id", parent_section.section_data_id)}]
     """
     return [cls(f, parent_section) for f in browser.find_elements(XP, xpath)]
   
@@ -22,10 +24,14 @@ class SubSection(BaseFormField):
     if button:=self.delete_button_element:
       button.click()
 
+  def xpath_customizer(self, xpath: str) -> str:
+    return xpath.removesuffix(xpaths.MULTISECTION_EXCLUDER)
+
   @property
   def form_fields(self) ->list[BaseFormField]:
     return [
-      *TextInput.find_all(self.element, self),
+      *TextInput.find_all(self.element, self, self.xpath_customizer(xpaths.FORM_TEXT_INPUT)),
+      *Dropdown.find_all(self.element, self, self.xpath_customizer(xpaths.FORM_DROPDOWN)),
     ]
       
   
@@ -37,11 +43,7 @@ class SubSection(BaseFormField):
  
 
 class MultiSection(BaseFormField):
-  XPATH = f"""
-    //div
-    [{xp_attr_ends_with('data-automation-id', 'Section')}]
-    [.//button[{xp_attr_starts_with('text()', 'Add')}]]
-  """
+  XPATH = xpaths.FORM_MULTISECTION
   NAME_XPATH = ".//h3"
   
   @property
@@ -50,6 +52,7 @@ class MultiSection(BaseFormField):
   
   @property
   def section_data_id(self) -> str:
+    """used in the subsections xpath"""
     return self.element.get_attribute("data-automation-id").removesuffix("Section")
 
   @property
