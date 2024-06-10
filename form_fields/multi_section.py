@@ -82,9 +82,9 @@ class MultiSection(BaseFormField):
           "Job Title": "Software Engineer",
           "Company": "Allin1Ship",
           "Location": "Brooklyn, NY",
+        },
+        SingleCheckBox: {
           "I currently work here": True,
-          
-
         }
       },
       "Work Experience 2": {},
