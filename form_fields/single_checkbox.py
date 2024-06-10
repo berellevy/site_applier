@@ -19,8 +19,12 @@ class SingleCheckBox(BaseFormField):
     return self.checkbox_element.get_attribute("aria-checked") == "true"
 
   @property
-  def is_filled(self) -> bool:
-    pass 
+  def answer(self):
+    return self.is_checked
+  
+  @property
+  def is_filled(self):
+    return self.answer == self.correct_answer
 
   def fill(self):
     if self.is_filled:
