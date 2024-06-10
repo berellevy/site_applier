@@ -1,12 +1,20 @@
 from browser import CSS, D, XP, data_id_find, find_element, WebElement, xp_attr_ends_with, xp_attr_starts_with
 from form_fields.base_form_field import BaseFormField
 from form_fields.dropdown import Dropdown
+from form_fields.single_checkbox import SingleCheckBox
 from form_fields.text_input import TextInput
 import xpaths
 
 
+
+
+
 class SubSection(BaseFormField):
   NAME_XPATH = ".//h4"
+
+  @property
+  def ANSWERS(self):
+    return self.correct_answer
 
   @classmethod
   def find_all(cls, browser: D, parent_section):
@@ -26,12 +34,17 @@ class SubSection(BaseFormField):
 
   def xpath_customizer(self, xpath: str) -> str:
     return xpath.removesuffix(xpaths.MULTISECTION_EXCLUDER)
+  
+  def find_all_override(self, input: BaseFormField) -> list[BaseFormField]:
+    custom_xpath = input.XPATH.removesuffix(xpaths.MULTISECTION_EXCLUDER)
+    return input.find_all(self.element, self, custom_xpath)
 
   @property
   def form_fields(self) ->list[BaseFormField]:
     return [
-      *TextInput.find_all(self.element, self, self.xpath_customizer(xpaths.FORM_TEXT_INPUT)),
-      *Dropdown.find_all(self.element, self, self.xpath_customizer(xpaths.FORM_DROPDOWN)),
+      *self.find_all_override(SingleCheckBox),
+      *self.find_all_override(TextInput),
+      *self.find_all_override(Dropdown),
     ]
       
   
@@ -45,6 +58,8 @@ class SubSection(BaseFormField):
 class MultiSection(BaseFormField):
   XPATH = xpaths.FORM_MULTISECTION
   NAME_XPATH = ".//h3"
+
+  
   
   @property
   def add_button_element(self) -> WebElement:
@@ -58,3 +73,20 @@ class MultiSection(BaseFormField):
   @property
   def sub_sections(self) -> list[SubSection]:
     return SubSection.find_all(self.element, self)
+  
+
+  ANSWERS = {
+    SubSection: {
+      "Work Experience 1": {
+        TextInput: {
+          "Job Title": "Software Engineer",
+          "Company": "Allin1Ship",
+          "Location": "Brooklyn, NY",
+          "I currently work here": True,
+          
+
+        }
+      },
+      "Work Experience 2": {},
+    }
+  }
