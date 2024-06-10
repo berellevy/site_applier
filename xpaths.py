@@ -39,6 +39,18 @@ FORM_RADIO = (
   f"{MULTISECTION_EXCLUDER}"
 )
 
+FORM_SINGLE_CHECKBOX = (
+  ".//div"
+  f"[{xp_attr_starts_with('data-automation-id', 'formField-')}]"
+  f"[count(.//input[@type='checkbox']) = 1]"
+  f"{MULTISECTION_EXCLUDER}"
+)
+
+FORM_MONTH_YEAR = (
+  ".//div"
+  f"[{xp_attr_starts_with('data-automation-id', 'formField-')}]"
+)
+
 ####################### PAGES #############################
 JOB_DESCRIPTION_PAGE = """
   //body[
