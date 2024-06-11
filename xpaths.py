@@ -17,6 +17,13 @@ FORM_TEXT_INPUT = (
   f"{MULTISECTION_EXCLUDER}"
 )
 
+FORM_TEXT_AREA = (
+  ".//div"
+  f"[{xp_attr_starts_with('data-automation-id', 'formField-')}]"
+  "[.//textarea]"
+  f"{MULTISECTION_EXCLUDER}"
+)
+
 FORM_DROPDOWN = (
   ".//div"
   f"[{xp_attr_starts_with('data-automation-id', 'formField-')}]"
@@ -49,6 +56,9 @@ FORM_SINGLE_CHECKBOX = (
 FORM_MONTH_YEAR = (
   ".//div"
   f"[{xp_attr_starts_with('data-automation-id', 'formField-')}]"
+  "[.//input[@aria-label='Month']]"
+  "[.//input[@aria-label='Year']]"
+  f"{MULTISECTION_EXCLUDER}"
 )
 
 ####################### PAGES #############################
