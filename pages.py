@@ -36,7 +36,7 @@ class BasePage:
   @property
   def path(self) -> list[str]:
     """Needed by form field path methods."""
-    return [self.name]
+    return {"page": self.name}
   
   def delete_header(self):
     """The header element sometimes blocks clicks to form fields."""
