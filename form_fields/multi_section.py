@@ -3,6 +3,8 @@ from form_fields.base_form_field import BaseFormField
 from form_fields.dropdown import Dropdown
 from form_fields.single_checkbox import SingleCheckBox
 from form_fields.text_input import TextInput
+from form_fields.month_year import MonthYear
+from form_fields.text_area import TextArea
 import xpaths
 
 
@@ -25,6 +27,11 @@ class SubSection(BaseFormField):
     return [cls(f, parent_section) for f in browser.find_elements(XP, xpath)]
   
   @property
+  def path(self) -> dict[str]:
+    return {**self.parent_section.path, "sub_section": self.name}
+
+
+  @property
   def delete_button_element(self) -> WebElement:
     return find_element(self.element, *data_id_find("button", "panel-set-delete-button"))
   
@@ -45,7 +52,16 @@ class SubSection(BaseFormField):
       *self.find_all_override(SingleCheckBox),
       *self.find_all_override(TextInput),
       *self.find_all_override(Dropdown),
+      *self.find_all_override(MonthYear),
+      *self.find_all_override(TextArea),
     ]
+
+  @property
+  def answer(self):
+    return {
+      field.name: field.answer 
+      for field in self.form_fields
+    }
       
   
   @property
@@ -59,7 +75,9 @@ class MultiSection(BaseFormField):
   XPATH = xpaths.FORM_MULTISECTION
   NAME_XPATH = ".//h3"
 
-  
+  @property
+  def path(self) -> dict[str]:
+    return {**self.parent_section.path, "section": self.name}
   
   @property
   def add_button_element(self) -> WebElement:
@@ -85,7 +103,13 @@ class MultiSection(BaseFormField):
         },
         SingleCheckBox: {
           "I currently work here": True,
-        }
+        },
+        MonthYear: {
+          "From*": ("06", "2021")
+        },
+        TextArea: {
+          "Role Description": "hello"
+        },
       },
       "Work Experience 2": {},
     }
