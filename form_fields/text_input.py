@@ -47,5 +47,5 @@ class TextInput(BaseFormField):
       self.input_element.send_keys(Keys.CONTROL + "a")
       self.input_element.send_keys(self.correct_answer)
     elif (not self.correct_answer) and self.is_required:
-      raise KeyError(f"Input Field '{self.name}' has no correct answer.")
+      raise self.missing_answer_error
     
