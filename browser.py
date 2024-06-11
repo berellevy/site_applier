@@ -13,6 +13,13 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 
+import platform
+
+if platform.system() == "Darwin":
+    SELECT_ALL = Keys.COMMAND + "a"
+elif platform.system() == "Windows":
+    SELECT_ALL = Keys.CONTROL + "a"
+
 D = TypeVar("D", bound=Union[WebDriver, WebElement])
 
 from drop_files import drop_files
@@ -90,14 +97,6 @@ def xp_attr_ends_with(attr: str, value: str) -> str:
 def xp_attr_starts_with(attr: str, value: str) -> str:
     attr = f"@{attr}" if attr != "text()" else attr
     return f"starts-with({attr}, '{value}')"
-
-# def get_parent(element: WebElement) -> D:
-#     """
-#     Returns an elements immediate parent in the dom.
-#     Unlike `element.parent`. which is, per the selenium intellisense:
-#     The 'Internal reference to the WebDriver instance this element was found from.
-#     """
-#     return element.find_element(XP, "..")
 
 
 def remove_element(element: WebElement):
