@@ -26,6 +26,11 @@ class BaseFormField:
   @property
   def name(self) -> str:
     return find_element(self.element, XP, self.NAME_XPATH).text  
+
+
+  @property
+  def answer(self):
+    pass
   
   @property
   def correct_answer(self) -> str:
@@ -38,10 +43,17 @@ class BaseFormField:
     """
     answers = self.parent_section.ANSWERS.get((type(self)))
     return answers.get(self.name) or key_is_prefix(answers, self.name)
+
+  def is_filled(self) -> bool:
+    return self.answer == self.correct_answer
   
   @property
-  def path(self) -> list[str]:
-    return [*self.parent_section.path, self.name]
+  def path(self) -> dict[str]:
+    return {
+      **self.parent_section.path, 
+      "field_type": type(self).__name__,
+      "field_name": self.name,
+    }
 
   @property
   def is_required(self) -> bool:
@@ -58,3 +70,7 @@ class BaseFormField:
     required = 'required, ' if getattr(self, "is_required", False) else ''
     correct_answer = f", answer: {answer}" if (answer:=getattr(self, "correct_answer", False)) else ""
     return f"<{classname}: {required}{name}{correct_answer}>"
+
+  @property 
+  def missing_answer_error(self) -> KeyError:
+    return KeyError(f"Input Field '{self.name}' has no correct answer.")
