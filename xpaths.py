@@ -69,12 +69,17 @@ JOB_DESCRIPTION_PAGE = """
   ]
 """
 
-START_APPLICATION_PAGE = """
-  //body[
-    .//div[@data-automation-id="jobPostingPage"] 
-    and .//h2[contains(text(),"Start Your Application")]
-  ]
-"""
+# START_APPLICATION_PAGE = """
+#   //body[
+#     .//div[@data-automation-id="jobPostingPage"] 
+#     and .//h2[contains(text(),"Start Your Application")]
+#   ]
+# """
+START_APPLICATION_PAGE = (
+  "//body"
+  # "[.//div[@data-automation-id='jobPostingPage']]"
+  "[.//h2[contains(text(),'Start Your Application')]]"
+)
 
 SIGN_IN_PAGE = """
   //div[
