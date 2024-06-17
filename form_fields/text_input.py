@@ -1,6 +1,6 @@
 from functools import cached_property
 import os
-from browser import CSS, D, data_id_find, find_element, el_text_content, WebElement, Keys, xp_attr_starts_with
+from browser import CSS, D, data_id_find, find_element, el_text_content, WebElement, Keys, xp_attr_starts_with, SELECT_ALL
 from workday import is_required
 from .base_form_field import BaseFormField
 import xpaths
@@ -8,13 +8,10 @@ import xpaths
 
 REQUIRED_FIELDS = {
   "Email Address",
-  "Sign In.Password",
+  "Password",
 }
 
 
-CORRECT_ANSWERS = {
-  
-}
 
 class TextInput(BaseFormField):
   XPATH = xpaths.FORM_TEXT_INPUT
@@ -32,6 +29,13 @@ class TextInput(BaseFormField):
   
     
   @property
+  def correct_answer(self):
+    a = super().correct_answer
+    if a:
+      return a[0]
+
+  
+  @property
   def is_filled(self):
     return self.input_element.get_attribute("value") == self.correct_answer
 
@@ -44,7 +48,7 @@ class TextInput(BaseFormField):
     if self.is_filled: 
       return
     if self.correct_answer:
-      self.input_element.send_keys(Keys.CONTROL + "a")
+      self.input_element.send_keys(SELECT_ALL)
       self.input_element.send_keys(self.correct_answer)
     elif (not self.correct_answer) and self.is_required:
       raise self.missing_answer_error
