@@ -1,15 +1,10 @@
-from browser import D, XP, find_element
+from browser import D, XP, find_element, is_stale, move_to_element
 import answers
 
-def key_is_prefix(d: dict, lookup: str):
-  """
-  Access a key in a dict even if the key only matches part of the lookup prefix.
-  Not efficient at all. Only good for small dicts. (oh baby)
-  """
-  for key in (d):
-    if lookup.startswith(key):
-      return d[key]
 
+
+class FormFillError(BaseException):
+  pass
 
 class BaseFormField:
   XPATH: str
@@ -43,10 +38,8 @@ class BaseFormField:
     will match the answer key "Have you worked at"
     """
     return answers.get(**self.path)
-    # answers = self.parent_section.ANSWERS.get((type(self)))
-    # return answers.get(self.name) or key_is_prefix(answers, self.name)
 
-
+  @property
   def is_filled(self) -> bool:
     return self.answer == self.correct_answer
   
@@ -77,3 +70,20 @@ class BaseFormField:
   @property 
   def missing_answer_error(self) -> KeyError:
     return KeyError(f"Input Field '{self.name}' has no correct answer.")
+  
+
+  def fill(self):
+    if is_stale(self.element):
+      """This handles elements that have disapeared. if they're not there we don't have to fill them."""
+      return
+    try:
+      if self.is_filled:
+        return 
+      if self.correct_answer:
+        move_to_element(self.element)
+        self._fill()
+      elif (not self.correct_answer) and self.is_required:
+        raise self.missing_answer_error
+    except Exception as e:
+        raise FormFillError(self) from e
+    
