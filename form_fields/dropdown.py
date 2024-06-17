@@ -1,3 +1,4 @@
+from time import sleep
 from browser import (
   CSS, 
   D, 
@@ -5,7 +6,8 @@ from browser import (
   data_id_find, 
   el_text_content, 
   find_element, 
-  WebElement, 
+  WebElement,
+  move_to_element, 
   xp_attr_starts_with
 )
 from form_fields.base_form_field import BaseFormField
@@ -37,17 +39,14 @@ class Dropdown(BaseFormField):
       button = find_element(self.element, CSS, "button")
       button.click()
 
-  def fill(self):
-    if self.is_filled:
-      return
-    
-    if self.correct_answer:
-      self.open_dropdown()
-      popup = find_element(
-        self.element.parent, 
-        CSS, "div[data-automation-widget='wd-popup']"
-      )
-      find_element(popup, *el_text_content("div", self.correct_answer, parent="li")).click()
-    elif (not self.correct_answer) and self.is_required:
-      raise KeyError(f"Input Field '{self.name}' has no correct answer.")
+  def _fill(self):
+    move_to_element(self.element)
+    sleep(.5)
+    self.open_dropdown()
+    popup = find_element(
+      self.element.parent, 
+      CSS, "div[data-automation-widget='wd-popup']"
+    )
+    find_element(popup, *el_text_content("div", self.correct_answer[0], parent="li"), raise_error=True).click()
+
 
