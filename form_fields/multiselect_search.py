@@ -7,10 +7,6 @@ from browser import CSS, D, data_id_find, WebElement, find_element, Keys, xp_att
 from .base_form_field import BaseFormField
 import xpaths
 
-CORRECT_ANSWERS: dict[str, list[str]] = {
-  "How Did You Hear About Us?*": ["Linkedin"],
-  "Country Phone Code*": ["United States of America (+1)"]
-}
 
 class MultiselectSearchField(BaseFormField):
   XPATH = xpaths.FORM_MULTISELECT_SEARCH
@@ -38,16 +34,11 @@ class MultiselectSearchField(BaseFormField):
       find_element(answer, *data_id_find("div", "DELETE_charm")).click()
   
   
-  def fill(self):
-    if self.is_filled:
-      return
-    if self.correct_answer:
-      self.empty_answers()
-      self.open_dropdown()
-      search_element = find_element(self.element, *data_id_find("input", "searchBox"))
-      search_element.send_keys(Keys.CONTROL + "a")
-      for answer in self.correct_answer:
-        search_element.send_keys(answer)
-        search_element.send_keys(Keys.ENTER)
-    elif (not self.correct_answer) and self.is_required:
-      raise KeyError(f"Input Field '{self.name}' has no correct answer.")
+  def _fill(self):
+    self.empty_answers()
+    self.open_dropdown()
+    search_element = find_element(self.element, *data_id_find("input", "searchBox"))
+    search_element.send_keys(Keys.CONTROL + "a")
+    for answer in self.correct_answer:
+      search_element.send_keys(answer)
+      search_element.send_keys(Keys.ENTER)
