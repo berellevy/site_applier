@@ -1,5 +1,5 @@
 selenium
-jupyter
+ipykernel
 pyautogui
 keyboard
 python-dotenv
