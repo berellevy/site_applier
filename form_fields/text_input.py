@@ -26,13 +26,7 @@ class TextInput(BaseFormField):
   @cached_property
   def input_element(self) -> WebElement:
     return find_element(self.element, CSS, "input")
-  
-    
-  @property
-  def correct_answer(self):
-    a = super().correct_answer
-    if a:
-      return a[0]
+
 
   
   @property
@@ -41,15 +35,5 @@ class TextInput(BaseFormField):
 
   
   def fill(self):
-    """
-    First empty the field. Then fill it.
-    Raise an error if the field is required and there is no correct answer.
-    """
-    if self.is_filled: 
-      return
-    if self.correct_answer:
-      self.input_element.send_keys(SELECT_ALL)
-      self.input_element.send_keys(self.correct_answer)
-    elif (not self.correct_answer) and self.is_required:
-      raise self.missing_answer_error
-    
+    self.input_element.send_keys(SELECT_ALL)
+    self.input_element.send_keys(self.correct_answer)
