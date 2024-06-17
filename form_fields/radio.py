@@ -8,21 +8,12 @@ import xpaths
 class Radio(BaseFormField):
   XPATH = xpaths.FORM_RADIO
   NAME_XPATH = ".//legend"
-
-  @property
-  def correct_answer(self):
-    if a:=super().correct_answer:
-      return a[0]
     
 
-  def fill(self):
-    if self.correct_answer:
-      element = find_element(self.element, *el_text_content("label", self.correct_answer, parent="div"))
-      move_to_element(element)
-      element.click()
-    elif (not self.correct_answer) and self.is_required:
-      raise KeyError(f"Input Field '{self.name}' has no correct answer.")
-
+  def _fill(self):
+    element = find_element(self.element, *el_text_content("label", self.correct_answer, parent="div"))
+    move_to_element(element)
+    element.click()
 
 
 
