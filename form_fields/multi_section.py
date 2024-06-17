@@ -1,4 +1,5 @@
-from browser import CSS, D, XP, data_id_find, find_element, WebElement, xp_attr_ends_with, xp_attr_starts_with
+from time import sleep
+from browser import CSS, D, XP, data_id_find, find_element, WebElement, move_to_element, xp_attr_ends_with, xp_attr_starts_with
 from form_fields.base_form_field import BaseFormField
 from form_fields.dropdown import Dropdown
 from form_fields.single_checkbox import SingleCheckBox
@@ -6,9 +7,11 @@ from form_fields.text_input import TextInput
 from form_fields.month_year import MonthYear
 from form_fields.text_area import TextArea
 import xpaths
+import answers
 
 
-
+class RequiredError(BaseException):
+  pass
 
 
 class SubSection(BaseFormField):
@@ -37,7 +40,11 @@ class SubSection(BaseFormField):
   
   def delete(self):
     if button:=self.delete_button_element:
+      move_to_element(button)
       button.click()
+      sleep(.5)
+    else:
+      raise RequiredError(self.path)
 
   def xpath_customizer(self, xpath: str) -> str:
     return xpath.removesuffix(xpaths.MULTISECTION_EXCLUDER)
@@ -52,8 +59,8 @@ class SubSection(BaseFormField):
       *self.find_all_override(SingleCheckBox),
       *self.find_all_override(TextInput),
       *self.find_all_override(Dropdown),
-      *self.find_all_override(MonthYear),
       *self.find_all_override(TextArea),
+      *self.find_all_override(MonthYear),
     ]
 
   @property
@@ -67,6 +74,11 @@ class SubSection(BaseFormField):
   @property
   def is_required(self) -> bool:
     return not bool(self.delete_button_element)
+  
+
+  def fill(self):
+    for field in self.form_fields:
+      field.fill()
   
 
  
@@ -83,34 +95,54 @@ class MultiSection(BaseFormField):
   def add_button_element(self) -> WebElement:
     return find_element(self.element, *data_id_find("button", "Add", starts_with=True))
   
+  def add_subsection(self):
+    button = self.add_button_element
+    move_to_element(button)
+    button.click()
+  
   @property
   def section_data_id(self) -> str:
     """used in the subsections xpath"""
     return self.element.get_attribute("data-automation-id").removesuffix("Section")
-
+  
+  
   @property
-  def sub_sections(self) -> list[SubSection]:
+  def existing_sub_sections(self) -> list[SubSection]:
     return SubSection.find_all(self.element, self)
   
+  @property
+  def correct_answer(self):
+    """The names of the subsections that we have answers for."""
+    return answers.get_sub_sections(**self.path)
+  
+  @property
+  def correct_sub_sections(self):
+    """
+    - remove non required subsections
+    - add required subsections if missing (using len of correct answer)
+    """
+    # REMOVE UNREQUIRED 
+    required_subsections = [*self.correct_answer]
+    for sub_section in self.existing_sub_sections:
+      if not (sub_section.name in required_subsections):
+        sub_section.delete()
+    # ADD REQUIRED
+    while len(self.existing_sub_sections)<len(required_subsections):
+      self.add_subsection()
+      sleep(.3)
+    return self.existing_sub_sections
+    
+  def _fill(self):
+    for sub_section in self.correct_sub_sections:
+      sub_section.fill()
+      
+    
+  
 
-  ANSWERS = {
-    SubSection: {
-      "Work Experience 1": {
-        TextInput: {
-          "Job Title": "Software Engineer",
-          "Company": "Allin1Ship",
-          "Location": "Brooklyn, NY",
-        },
-        SingleCheckBox: {
-          "I currently work here": True,
-        },
-        MonthYear: {
-          "From*": ("06", "2021")
-        },
-        TextArea: {
-          "Role Description": "hello"
-        },
-      },
-      "Work Experience 2": {},
-    }
-  }
+  
+  
+
+
+  
+
+
