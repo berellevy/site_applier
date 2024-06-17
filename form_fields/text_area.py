@@ -21,18 +21,14 @@ class TextArea(BaseFormField):
   @property
   def is_filled(self):
     return self.input_element.get_attribute("value") == self.correct_answer
+  
+  @property
+  def correct_answer(self):
+    return "\n".join(super().correct_answer)
 
   
-  def fill(self):
-    """
-    First empty the field. Then fill it.
-    Raise an error if the field is required and there is no correct answer.
-    """
-    if self.is_filled: 
-      return
-    if self.correct_answer:
-      self.input_element.send_keys(SELECT_ALL)
-      self.input_element.send_keys(self.correct_answer)
-    elif (not self.correct_answer) and self.is_required:
-      raise self.missing_answer_error
+  def _fill(self):
+    self.input_element.send_keys(SELECT_ALL)
+    self.input_element.send_keys(self.correct_answer)
+    
     
