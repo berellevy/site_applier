@@ -1,4 +1,5 @@
 from browser import D, XP, find_element
+import answers
 
 def key_is_prefix(d: dict, lookup: str):
   """
@@ -33,7 +34,7 @@ class BaseFormField:
     pass
   
   @property
-  def correct_answer(self) -> str:
+  def correct_answer(self) -> list[str | bool]:
     """
     if an exact match isn't found, it then searches for an answer whos key
     matches the beginning of the field name.
@@ -41,8 +42,10 @@ class BaseFormField:
     The field name "Have you worked at Etsy, Reverb, or Depop before?*"
     will match the answer key "Have you worked at"
     """
-    answers = self.parent_section.ANSWERS.get((type(self)))
-    return answers.get(self.name) or key_is_prefix(answers, self.name)
+    return answers.get(**self.path)
+    # answers = self.parent_section.ANSWERS.get((type(self)))
+    # return answers.get(self.name) or key_is_prefix(answers, self.name)
+
 
   def is_filled(self) -> bool:
     return self.answer == self.correct_answer
