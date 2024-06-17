@@ -8,6 +8,11 @@ import xpaths
 class Radio(BaseFormField):
   XPATH = xpaths.FORM_RADIO
   NAME_XPATH = ".//legend"
+
+  @property
+  def correct_answer(self):
+    if a:=super().correct_answer:
+      return a[0]
     
 
   def fill(self):
