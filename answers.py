@@ -13,8 +13,8 @@ _df = load_answers()
 def get_sub_sections(*, page, section):
   return list(
     _df.loc[
-      (_df["page"] == "My Experience") &
-      (_df["section"] == "Work Experience"),
+      (_df["page"] == page) &
+      (_df["section"] == section),
       "sub_section"
     ]
     .unique()
@@ -29,7 +29,7 @@ def get(
   section: str = None,
   sub_section: str = None,
 ):
-
+  
   base_filters = (
     (_df["page"].eq(page) if page else True) &
     (_df["field_type"].eq(field_type) if field_type else True) &
