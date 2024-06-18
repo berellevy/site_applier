@@ -73,7 +73,7 @@ class MultiselectSearchField(BaseFormField):
     self.remove_answers()
     self.open_dropdown()
     search_element = find_element(self.element, *data_id_find("input", "searchBox"))
-    for answer in self.correct_answer[:4]:
+    for answer in self.correct_answer:
       self.fill_one(answer, search_element)
       sleep(.5)
     move_to_element(search_element, extra_up=-200)
