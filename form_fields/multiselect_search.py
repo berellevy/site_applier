@@ -63,7 +63,7 @@ class MultiselectSearchField(BaseFormField):
     choice_element = wait_for_element(self.dropdown_element, XP, f".//div[@aria-label='{answer}']", timeout=3)
 
     if choice_element and (not find_element(choice_element, XP, ".//div[@data-automation-checked='Checked']")):
-      move_to_element(choice_element)
+      move_to_element(choice_element, extra_up=-200)
       choice_element.click()
     sleep(.1)
     
@@ -73,7 +73,8 @@ class MultiselectSearchField(BaseFormField):
     self.remove_answers()
     self.open_dropdown()
     search_element = find_element(self.element, *data_id_find("input", "searchBox"))
-    for answer in self.correct_answer:
+    for answer in self.correct_answer[:4]:
       self.fill_one(answer, search_element)
       sleep(.5)
+    move_to_element(search_element, extra_up=-200)
     search_element.click()
