@@ -1,4 +1,5 @@
 from functools import lru_cache
+from numbers import Number
 from time import sleep
 from typing import TypeVar, Union
 from selenium import webdriver
@@ -41,8 +42,13 @@ def get_action_chain(browser: WebDriver):
   """same browser doesn't need new action chains each time"""
   return ActionChains(browser)
 
-def move_to_element(element: WebElement):
+def move_to_element(element: WebElement, extra_up: Number | None = None):
+  """
+  extra_up: extra scrolling. positive number scrolls up, negative number scrolls down.
+  """
   element.parent.execute_script("arguments[0].scrollIntoView(true);", element)
+  if extra_up:
+    element.parent.execute_script(f"window.scrollBy(0, {extra_up})")
   sleep(.2)
   
 
@@ -57,6 +63,20 @@ def find_element(
   """
   try:
     return browser.find_element(by, selector)
+  except Exception as e:
+    if raise_error:
+      raise e
+    else:
+      return False
+    
+
+def wait_for_element(browser, by, value, timeout = 10, raise_error = False):
+  """Convenience wrapper."""
+  try:
+    return (
+      WebDriverWait(browser,timeout,)
+      .until(EC.presence_of_element_located((by, value)))
+    )
   except Exception as e:
     if raise_error:
       raise e
