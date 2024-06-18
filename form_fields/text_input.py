@@ -34,6 +34,6 @@ class TextInput(BaseFormField):
     return self.input_element.get_attribute("value") == self.correct_answer
 
   
-  def fill(self):
+  def _fill(self):
     self.input_element.send_keys(SELECT_ALL)
     self.input_element.send_keys(self.correct_answer)
