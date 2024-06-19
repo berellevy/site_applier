@@ -5,6 +5,7 @@ A class for each page.
 import os
 from browser import D, XP, find_element, data_id_find, remove_element
 from form_fields import BaseFormField, TextInput, MultiselectSearchField, Dropdown, Radio
+from form_fields.file_upload import MultiFileUpload
 from form_fields.multi_section import MultiSection
 import xpaths
 
@@ -30,7 +31,8 @@ class BasePage:
       *MultiselectSearchField.find_all(self.browser, self),
       *Dropdown.find_all(self.browser, self),
       *Radio.find_all(self.browser, self),
-      *MultiSection.find_all(self.browser, self)
+      *MultiSection.find_all(self.browser, self),
+      *MultiFileUpload.find_all(self.browser, self),
     ]
   
   @property
