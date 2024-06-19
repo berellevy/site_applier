@@ -3,3 +3,4 @@ venv
 .env
 answers.csv
 answers.json
+resume/*.pdf
