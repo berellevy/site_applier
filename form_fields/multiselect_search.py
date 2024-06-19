@@ -38,19 +38,22 @@ class MultiselectSearchField(BaseFormField):
   def dropdown_open(self) -> bool:
     return bool(find_element(self.element, *data_id_find("input", "searchBox")))
   
+  @property 
+  def dropdown_open_button_element(self) -> WebElement:
+    return find_element(
+      self.element, 
+      XP,
+      ".//span[@data-automation-id='promptIcon' or @data-automation-id='promptSearchButton']"
+    )
+
   def open_dropdown(self):
     if not self.dropdown_open:
-      el = find_element(
-        self.element, 
-        XP,
-        """.//span[
-        @data-automation-id='promptIcon' or @data-automation-id='promptSearchButton'
-        ]"""
-      )
-      # el = find_element(self.element, *data_id_find("div", "multiselectInputContainer"))
+      el = self.dropdown_toggle_element
       move_to_element(el, extra_up=-200)
       el.click()
-  
+      
+  def close_dropdown(self):
+    find_element(self.element.parent, XP, ".//body").click()
 
   def remove_incorrect_answers(self):
     correct_answers = set(self.correct_answer)
@@ -85,5 +88,6 @@ class MultiselectSearchField(BaseFormField):
       if not correct_answer in self.answer:
         self.fill_one(correct_answer, search_element)
         sleep(.5)
-    move_to_element(search_element, extra_up=-200)
-    search_element.click()
+    # move_to_element(search_element, extra_up=-200)
+    # search_element.click()
+    self.close_dropdown()
