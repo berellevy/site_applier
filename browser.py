@@ -1,7 +1,7 @@
 from functools import lru_cache
 from numbers import Number
 from time import sleep
-from typing import TypeVar, Union
+from typing import Literal, TypeVar, Union
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -120,6 +120,10 @@ def xp_attr_starts_with(attr: str, value: str) -> str:
   attr = f"@{attr}" if attr != "text()" else attr
   return f"starts-with({attr}, '{value}')"
 
+def xp_attr_contains(attr: str, value: str) -> str:
+  attr = f"@{attr}" if attr != "text()" else attr
+  return f"contains({attr}, '{value}')"
+
 
 def remove_element(element: WebElement):
   element.parent.execute_script("arguments[0].remove()", element)
@@ -131,3 +135,27 @@ def is_stale(element: WebElement) -> bool:
     return False
   except StaleElementReferenceException:
     return True
+  
+
+
+def d_id(value, match_type: Literal["exact", "startswith", "endswith", "contains"] = "exact") -> str:
+  """
+  Abbreviation for attribute data-automation-id='value'.
+  
+  Examples: 
+  >>> d_di("hello")
+  "@data-automation-id='hello'"
+  >>> d_id("hello", match_type="startswith")
+  "starts-with(@data-automation-id, 'hello')"
+  >>> d_id("hello", match_type="endswith")
+  "substring(@data-automation-id, string-length(@data-automation-id) - string-length('hello') + 1) = 'hello'"
+  >>> d_id("hello", match_type="contains")
+  "contains(@data-automation-id, 'hello')"
+  """
+  attr = "data-automation-id"
+  return {
+    "exact": f"@{attr}='{value}'",
+    "startswith": xp_attr_starts_with(attr, value),
+    "endswith": xp_attr_ends_with(attr, value),
+    "contains": xp_attr_contains(attr, value)
+  }[match_type]
