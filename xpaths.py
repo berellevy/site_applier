@@ -1,4 +1,4 @@
-from browser import xp_attr_ends_with, xp_attr_starts_with
+from browser import xp_attr_ends_with, xp_attr_starts_with, xp_attr_contains
 
 ####################### FORM INPUTS ######################
 FORM_MULTISECTION = (
@@ -71,7 +71,7 @@ JOB_DESCRIPTION_PAGE = """
 
 START_APPLICATION_PAGE = (
   "//body"
-  "[.//h2[contains(text(),'Start Your Application')]]"
+  "[//h2[contains(text(),'Start Your Application')]]"
 )
 
 SIGN_IN_PAGE = """
@@ -82,6 +82,33 @@ SIGN_IN_PAGE = """
   ]
 """
 
-MY_INFORMATION_PAGE = f"//h2[{xp_attr_starts_with('text()', 'My Information')}]"
+REVIEW_PAGE = f"//h2[{xp_attr_starts_with('text()', 'Review')}]"
 
-MY_EXPERIENCE_PAGE = f"//h2[{xp_attr_starts_with('text()', 'My Experience')}]"
+MY_INFORMATION_PAGE = (
+    "//body"
+    f"[//h2[{xp_attr_starts_with('text()', 'My Information')}]]"
+    f"[not({REVIEW_PAGE})]"
+)
+
+MY_EXPERIENCE_PAGE = (
+    "//body"
+    f"[//h2[{xp_attr_starts_with('text()', 'My Experience')}]]"
+    f"[not({REVIEW_PAGE})]"
+)
+
+APPLICATION_QUESTIONS_PAGE = (
+    "//body"
+    f"[//h2[{xp_attr_starts_with('text()', 'Application Questions')}]]"
+    f"[not({REVIEW_PAGE})]"
+)
+
+VOLUNTARY_DISCLOSURES_PAGE = (
+    "//body"
+    f"[//h2[{xp_attr_starts_with('text()', 'Voluntary Disclosures')}]]"
+    f"[not({REVIEW_PAGE})]"
+)
+
+ALREADY_APPLIED_PAGE = (
+    "//body"
+    f"[//h2[{xp_attr_contains('text()', 'already applied for this job')}]]"
+)
