@@ -17,14 +17,19 @@ class TextArea(BaseFormField):
   @cached_property
   def input_element(self) -> WebElement:
     return find_element(self.element, XP, ".//textarea")
+
+
+  @property
+  def answer(self):
+    return self.input_element.get_attribute("value")
     
   @property
   def is_filled(self):
-    return self.input_element.get_attribute("value") == self.correct_answer
+    return self.answer == self.correct_answer
   
   @property
   def correct_answer(self):
-    return "\n".join(super().correct_answer)
+    return "\n".join(super().correct_answer or [])
 
   
   def _fill(self):
