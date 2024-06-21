@@ -84,8 +84,8 @@ class BaseFormField:
     try:
       if self.is_filled:
         return 
-      if self.correct_answer:
-        move_to_element(self.element)
+      if self.correct_answer != None: # Correct answer can sometimes be `False`!
+        move_to_element(self.element, extra_up=-200)
         self._fill()
       elif (not self.correct_answer) and self.is_required:
         raise self.missing_answer_error
