@@ -52,6 +52,11 @@ class BaseFormField:
     }
 
   @property
+  def path_and_current_answer(self):
+    return {**self.path, "answer": self.answer}
+
+
+  @property
   def is_required(self) -> bool:
     return "*" in self.name
 
