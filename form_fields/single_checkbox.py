@@ -5,7 +5,7 @@ import xpaths
 
 class SingleCheckBox(BaseFormField):
   XPATH = xpaths.FORM_SINGLE_CHECKBOX
-  NAME_XPATH = ".//label"
+  NAME_XPATH = ".//label[string-length(text()) > 0]"
 
   @property
   def checkbox_element(self) -> WebElement:
@@ -21,12 +21,7 @@ class SingleCheckBox(BaseFormField):
   @property
   def answer(self):
     return self.is_checked
-  
-  @property
-  def is_filled(self):
-    return self.answer == self.correct_answer
 
-  def fill(self):
-    if self.is_filled:
-      return 
+
+  def _fill(self): 
     self.checkbox_element.click()
