@@ -48,7 +48,7 @@ class MultiselectSearchField(BaseFormField):
 
   def open_dropdown(self):
     if not self.dropdown_open:
-      el = self.dropdown_toggle_element
+      el = self.dropdown_open_button_element
       move_to_element(el, extra_up=-200)
       el.click()
       
