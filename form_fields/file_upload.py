@@ -51,6 +51,7 @@ class MultiFileUpload(BaseFormField):
   
   def fill(self):
     self.remove_uploaded_files()
+    sleep(.3)
     drop_zone_element = find_element(self.element, XP, f".//div[{d_id('file-upload-drop-zone')}]")
     drop_files(drop_zone_element, self.correct_answer)
 
