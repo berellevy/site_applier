@@ -3,8 +3,10 @@ A class for each page.
 """
 
 import os
-from browser import D, XP, find_element, data_id_find, remove_element
+from browser import D, XP, find_element, data_id_find, remove_element, xp_attr_starts_with
 from form_fields import BaseFormField, TextInput, MultiselectSearchField, Dropdown, Radio
+from form_fields.single_checkbox import SingleCheckBox
+from form_fields.text_area import TextArea
 from form_fields.file_upload import MultiFileUpload
 from form_fields.multi_section import MultiSection
 import xpaths
@@ -33,6 +35,8 @@ class BasePage:
       *Radio.find_all(self.browser, self),
       *MultiSection.find_all(self.browser, self),
       *MultiFileUpload.find_all(self.browser, self),
+      *TextArea.find_all(self.browser, self),
+      *SingleCheckBox.find_all(self.browser, self),
     ]
   
   @property
@@ -140,9 +144,19 @@ class MyInformation(BasePage):
 class MyExperience(BasePage):
   name = "My Experience"
   XPATH = xpaths.MY_EXPERIENCE_PAGE
-  
+  NEXT_PAGE_BUTTON_XPATH = "//button[@data-automation-id='bottom-navigation-next-button']"
     
+@register
+class ApplicationQuestions(BasePage):
+  name = "Application Questions"
+  XPATH = f"//h2[{xp_attr_starts_with('text()', 'Application Questions')}]"
+  NEXT_PAGE_BUTTON_XPATH = "//button[@data-automation-id='bottom-navigation-next-button']"
 
+@register
+class VoluntaryDisclosures(BasePage):
+  name = "Voluntary Disclosures"
+  XPATH = f"//h2[{xp_attr_starts_with('text()', 'Voluntary Disclosures')}]"
+  NEXT_PAGE_BUTTON_XPATH = "//button[@data-automation-id='bottom-navigation-next-button']"
 
 
 @register
