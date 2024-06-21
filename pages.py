@@ -22,7 +22,8 @@ class BasePage:
     self.browser = browser
   
   @classmethod
-  def is_current(cls, browser: D) -> bool:
+  def is_current(cls, browser: D, custom_xpath: str | None = None) -> bool:
+    xpath = custom_xpath or cls.XPATH
     if find_element(browser, XP, cls.XPATH):
       return cls(browser)
 
@@ -62,6 +63,7 @@ PAGES: list[BasePage] = []
 
 def register(page: BasePage):
   PAGES.append(page)
+  return page
 
 
 def get_current_page(browser: D) -> BasePage:
@@ -98,12 +100,6 @@ class SignIn(BasePage):
   NEXT_PAGE_BUTTON_XPATH = """
   //button[@data-automation-id='signInSubmitButton']/parent::div
   """
-  ANSWERS = {
-    TextInput: {
-      "Email Address": os.getenv("WORKDAY_USERNAME"),
-      "Password": os.getenv("WORKDAY_PASSWORD"),
-    },
-  }
   
   
 @register
@@ -111,29 +107,6 @@ class MyInformation(BasePage):
   name = "My Information"
   XPATH = xpaths.MY_INFORMATION_PAGE
   NEXT_PAGE_BUTTON_XPATH = "//button[@data-automation-id='bottom-navigation-next-button']"
-  ANSWERS = {
-    TextInput: {
-      "First Name*": "Dovber",
-      "Last Name*": "Levy",
-      "Address Line 1*": "575 East New York Ave",
-      "City*": "Brooklyn",
-      "Postal Code*": "11225",
-      "Phone Number*": os.getenv("PHONE_NUMBER"),
-    },
-    MultiselectSearchField: {
-        "How Did You Hear About Us?*": ["Linkedin"],
-        "Country Phone Code*": ["United States of America (+1)"],
-    },
-    Dropdown: {
-      "Country*": "United States of America",
-      "State*": "New York",
-      "Phone Device Type*": "Mobile",
-    },
-    Radio: {
-      "Have you worked at": "No",
-    },
-  }
-
   def fill(self):
     self.delete_header()
     super().fill()
@@ -149,14 +122,28 @@ class MyExperience(BasePage):
 @register
 class ApplicationQuestions(BasePage):
   name = "Application Questions"
-  XPATH = f"//h2[{xp_attr_starts_with('text()', 'Application Questions')}]"
+  XPATH = xpaths.APPLICATION_QUESTIONS_PAGE
   NEXT_PAGE_BUTTON_XPATH = "//button[@data-automation-id='bottom-navigation-next-button']"
 
 @register
 class VoluntaryDisclosures(BasePage):
   name = "Voluntary Disclosures"
-  XPATH = f"//h2[{xp_attr_starts_with('text()', 'Voluntary Disclosures')}]"
+  XPATH = xpaths.VOLUNTARY_DISCLOSURES_PAGE
   NEXT_PAGE_BUTTON_XPATH = "//button[@data-automation-id='bottom-navigation-next-button']"
+
+@register
+class Review(BasePage):
+  name = "Review"
+  XPATH = xpaths.REVIEW_PAGE
+  NEXT_PAGE_BUTTON_XPATH = "//button[@data-automation-id='bottom-navigation-next-button']"
+
+
+@register
+class AlreadyApplied(BasePage):
+  name = "Already Applied"
+  XPATH = xpaths.ALREADY_APPLIED_PAGE
+  def next_page(self):
+    return "Already applied."
 
 
 @register
