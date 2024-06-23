@@ -1,9 +1,7 @@
 from functools import cached_property
 import os
-from browser import CSS, D, data_id_find, find_element, el_text_content, WebElement, Keys, xp_attr_starts_with, XP, SELECT_ALL
-from workday import is_required
+from utils import find_element, WebElement, XP, SELECT_ALL, xpaths
 from .base_form_field import BaseFormField
-import xpaths
 
 
 CORRECT_ANSWERS = {
@@ -16,7 +14,7 @@ class TextArea(BaseFormField):
 
   @cached_property
   def input_element(self) -> WebElement:
-    return find_element(self.element, XP, ".//textarea")
+    return find_element(self.element, ".//textarea")
 
 
   @property
