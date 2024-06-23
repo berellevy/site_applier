@@ -1,6 +1,6 @@
 __pycache__
 venv
 .env
-answers.csv
 answers.json
 resume/*.pdf
+*.ipynb
