@@ -1,11 +1,7 @@
-
-
 import os
 from time import sleep
-from typing import Literal
-from drop_files import drop_files
 from form_fields.base_form_field import BaseFormField
-from browser import XP, d_id, find_element, WebElement, move_to_element
+from utils import XP, find_element, WebElement, move_to_element, d_id, drop_files
 
 
 
@@ -21,7 +17,7 @@ class MultiFileUpload(BaseFormField):
 
   @property
   def is_required(self) -> bool:
-    label_element = find_element(self.element, XP, ".//label")
+    label_element = find_element(self.element, ".//label")
     return "*" in label_element.text
   
   @property
@@ -52,6 +48,6 @@ class MultiFileUpload(BaseFormField):
   def fill(self):
     self.remove_uploaded_files()
     sleep(.3)
-    drop_zone_element = find_element(self.element, XP, f".//div[{d_id('file-upload-drop-zone')}]")
+    drop_zone_element = find_element(self.element, f".//div[{d_id('file-upload-drop-zone')}]")
     drop_files(drop_zone_element, self.correct_answer)
 
