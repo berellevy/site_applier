@@ -1,6 +1,5 @@
-from browser import XP, find_element, WebElement
+from utils import XP, find_element, WebElement, xpaths
 from form_fields.base_form_field import BaseFormField
-import xpaths
 
 
 class SingleCheckBox(BaseFormField):
@@ -11,7 +10,7 @@ class SingleCheckBox(BaseFormField):
   def checkbox_element(self) -> WebElement:
     return find_element(
       self.element, 
-      XP, ".//input[@type='checkbox']"
+      ".//input[@type='checkbox']"
     )
 
   @property
