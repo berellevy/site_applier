@@ -1,17 +1,12 @@
 from time import sleep
-from browser import (
-  CSS, 
-  D, 
-  XP, 
-  data_id_find, 
-  el_text_content, 
+from utils import (
   find_element, 
   WebElement,
   move_to_element, 
-  xp_attr_starts_with
+  xp,
+  xpaths,
 )
 from form_fields.base_form_field import BaseFormField
-import xpaths
 
 class Dropdown(BaseFormField):
   XPATH = xpaths.FORM_DROPDOWN
@@ -19,7 +14,7 @@ class Dropdown(BaseFormField):
   
   @property
   def button_element(self) -> WebElement:
-    return find_element(self.element, CSS, "button[aria-haspopup]")
+    return find_element(self.element, ".//button[@aria-haspopup]")
   
   @property
   def answer(self) -> str:
@@ -36,7 +31,7 @@ class Dropdown(BaseFormField):
 
   def open_dropdown(self):
     if not self.dropdown_open:
-      button = find_element(self.element, CSS, "button")
+      button = find_element(self.element, ".//button")
       button.click()
 
   def _fill(self):
@@ -45,8 +40,13 @@ class Dropdown(BaseFormField):
     self.open_dropdown()
     popup = find_element(
       self.element.parent, 
-      CSS, "div[data-automation-widget='wd-popup']"
+      ".//div[@data-automation-widget='wd-popup']"
     )
-    find_element(popup, *el_text_content("div", self.correct_answer[0], parent="li"), raise_error=True).click()
+    
+    find_element(
+      popup, 
+      f".//li[div[{xp.attr_contains("text()", self.correct_answer[0])}]]",
+      raise_error=True
+    ).click()
 
 
