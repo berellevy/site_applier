@@ -1,12 +1,11 @@
 from time import sleep
-from browser import CSS, D, XP, data_id_find, find_element, WebElement, move_to_element, xp_attr_ends_with, xp_attr_starts_with
+from utils import D, XP, find_element, WebElement, move_to_element, d_id, xpaths
 from form_fields.base_form_field import BaseFormField
 from form_fields.dropdown import Dropdown
 from form_fields.single_checkbox import SingleCheckBox
 from form_fields.text_input import TextInput
 from form_fields.month_year import MonthYear
 from form_fields.text_area import TextArea
-import xpaths
 import answers
 
 
@@ -23,10 +22,10 @@ class SubSection(BaseFormField):
 
   @classmethod
   def find_all(cls, browser: D, parent_section):
-    xpath = f"""
-      .//div
-      [{xp_attr_starts_with("data-automation-id", parent_section.section_data_id)}]
-    """
+    xpath = (
+      ".//div"
+      f"[{d_id(parent_section.section_data_id, 'startswith')}]"
+    )
     return [cls(f, parent_section) for f in browser.find_elements(XP, xpath)]
   
   @property
@@ -36,7 +35,7 @@ class SubSection(BaseFormField):
 
   @property
   def delete_button_element(self) -> WebElement:
-    return find_element(self.element, *data_id_find("button", "panel-set-delete-button"))
+    return find_element(self.element, f".//button[{d_id('panel-set-delete-button')}]")
   
   def delete(self):
     if button:=self.delete_button_element:
@@ -50,6 +49,7 @@ class SubSection(BaseFormField):
     return xpath.removesuffix(xpaths.MULTISECTION_EXCLUDER)
   
   def find_all_override(self, input: BaseFormField) -> list[BaseFormField]:
+    """remove the multisection excluder xpath snippet from the form_fields `XPATH` property"""
     custom_xpath = input.XPATH.removesuffix(xpaths.MULTISECTION_EXCLUDER)
     return input.find_all(self.element, self, custom_xpath)
 
@@ -93,7 +93,7 @@ class MultiSection(BaseFormField):
   
   @property
   def add_button_element(self) -> WebElement:
-    return find_element(self.element, *data_id_find("button", "Add", starts_with=True))
+    return find_element(self.element, f".//button[{d_id('Add', 'startswith')}]")
   
   def add_subsection(self):
     button = self.add_button_element
@@ -121,12 +121,12 @@ class MultiSection(BaseFormField):
     - remove non required subsections
     - add required subsections if missing (using len of correct answer)
     """
-    # REMOVE UNREQUIRED 
+    # REMOVE UNREQUIRED SUBSECTIONS
     required_subsections = [*self.correct_answer]
     for sub_section in self.existing_sub_sections:
       if not (sub_section.name in required_subsections):
         sub_section.delete()
-    # ADD REQUIRED
+    # ADD REQUIRED SUBSECTIONS
     while len(self.existing_sub_sections)<len(required_subsections):
       self.add_subsection()
       sleep(.3)
