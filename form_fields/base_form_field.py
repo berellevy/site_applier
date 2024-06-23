@@ -1,4 +1,4 @@
-from browser import D, XP, find_element, is_stale, move_to_element
+from utils import D, XP, find_element, is_stale, move_to_element
 import answers
 
 
@@ -21,7 +21,7 @@ class BaseFormField:
 
   @property
   def name(self) -> str:
-    return find_element(self.element, XP, self.NAME_XPATH).text  
+    return find_element(self.element, self.NAME_XPATH).text  
 
 
   @property
