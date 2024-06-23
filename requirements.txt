@@ -1,6 +1,4 @@
 selenium
 ipykernel
-pyautogui
-keyboard
 python-dotenv
 pandas
