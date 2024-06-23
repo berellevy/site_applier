@@ -1,9 +1,5 @@
-from functools import cached_property
-import os
-from browser import CSS, D, data_id_find, find_element, el_text_content, WebElement, Keys, xp_attr_starts_with, SELECT_ALL
-from workday import is_required
+from utils import find_element, WebElement, SELECT_ALL, XP, xpaths
 from .base_form_field import BaseFormField
-import xpaths
 
 
 REQUIRED_FIELDS = {
@@ -19,19 +15,16 @@ class TextInput(BaseFormField):
 
   @property
   def is_required(self):
-    return (
-      self.name in REQUIRED_FIELDS or super().is_required
-    )
+    return (self.name in REQUIRED_FIELDS or super().is_required)
 
-  @cached_property
+  @property
   def input_element(self) -> WebElement:
-    return find_element(self.element, CSS, "input")
-
-
+    return find_element(self.element, ".//input")
   
   @property
-  def is_filled(self):
-    return self.input_element.get_attribute("value") == self.correct_answer
+  def answer(self) -> str:
+    return self.input_element.get_attribute("value")
+
 
   
   def _fill(self):
