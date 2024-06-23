@@ -1,7 +1,6 @@
 from time import sleep
-from browser import XP, find_element, WebElement, Keys, is_stale
+from utils import XP, find_element, WebElement, xpaths
 from form_fields.base_form_field import BaseFormField
-import xpaths
 
 
 class MonthYear(BaseFormField):
@@ -10,11 +9,11 @@ class MonthYear(BaseFormField):
 
   @property
   def month_input_element(self) -> WebElement:
-    return find_element(self.element, XP, ".//input[@aria-label='Month']")
+    return find_element(self.element, ".//input[@aria-label='Month']")
 
   @property
   def year_input_element(self) -> WebElement:
-    return find_element(self.element, XP, ".//input[@aria-label='Year']")
+    return find_element(self.element, ".//input[@aria-label='Year']")
 
   @property
   def answer(self):
